@@ -40,13 +40,17 @@ reboot
 
 %post --log=/root/anaconda-post.log
 
-exec < /dev/tty3 > /dev/tty3
+exec < /dev/tty3 > /dev/tty3 2>&1
 chvt 3
 set -x
 
 # For some reason, DEBUG is set but empty in the kickstart.
 # Unset it so ruby_parser doesn't print LOTS of output.
 unset DEBUG
+
+echo "INFO:  MESSAGE TO stdout"
+
+echo "ERROR: MESSAGE TO Stderr" >&2
 
 <%= render_partial "post/firewalld" %>
 
@@ -77,6 +81,12 @@ done
 kversion=$(rpm -q kernel --qf '%{version}-%{release}.%{arch}\n')
 ramfsfile="/boot/initramfs-$kversion.img"
 /sbin/dracut --force --add-drivers "mptbase mptscsih mptspi<%= " hv_storvsc hid_hyperv hv_netvsc hv_vmbus" if @target == "hyperv" %>" $ramfsfile $kversion
+
+echo "INFO: AND NOW THE LAST THING TO PRINT TO STDOUT"
+
+echo "ERROR: AND NOW THE LAST THING TO PRINT TO STDERR" >&2
+
+echo "TADA !!!!"
 
 chvt 1
 %end
